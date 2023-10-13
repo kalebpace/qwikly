@@ -1,0 +1,4 @@
+[submodule "qwik"]
+	path = qwik
+	url = git@github.com:kalebpace/qwik
+	branch = kpace/fastly-adapter
