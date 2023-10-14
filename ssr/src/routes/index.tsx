@@ -10,6 +10,7 @@ export default component$(() => {
         <br />
         Happy coding.
       </p>
+      <p>Output from: <span><pre>env("FASTLY_HOSTNAME")</pre></span></p>
       <pre>{env("FASTLY_HOSTNAME")}</pre>
     </>
   );

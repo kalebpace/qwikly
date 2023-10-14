@@ -1,9 +1,11 @@
+## Demo
+https://steadily-endless-sunbeam.edgecompute.app/
+
 ## TODO
 - [x] Build qwik city with ssr, deploy static and functions, respond with SimpleCache
-- [] Fix fastly: protocol import errors and allow utiltiy functions to be used from ssr project (e.g. env from fastly:env)
-- [] Implement redirects with VCL: https://developer.fastly.com/solutions/tutorials/redirects/, similar to Cloudflare Pages _routes.json
-- [] Implement custom headers: https://developer.fastly.com/reference/http/http-headers/
-
+- [ ] Fix fastly: protocol import errors and allow utiltiy functions to be used from ssr project (e.g. env from fastly:env)
+- [ ] Implement redirects with VCL: https://developer.fastly.com/solutions/tutorials/redirects/, similar to Cloudflare Pages _routes.json
+- [ ] Implement custom headers: https://developer.fastly.com/reference/http/http-headers/
 
 ### Fastly SSR Setup
 The existing `ssr` project was generated with the following

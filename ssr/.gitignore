@@ -3,6 +3,8 @@
 /lib
 /lib-types
 /server
+/bin
+/pkg
 
 # Development
 node_modules

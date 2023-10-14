@@ -6,7 +6,7 @@ description = ""
 language = "javascript"
 manifest_version = 2
 name = "fastly-adapter"
-service_id = "8FqCDnQga5XI0oY85KDj94"
+service_id = "WsI3ucyZwnMaVIRJkDdlt2"
 
 [scripts]
   build = "npm run build.server"
