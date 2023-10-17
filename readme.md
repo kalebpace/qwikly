@@ -4,7 +4,7 @@ https://steadily-endless-sunbeam.edgecompute.app/
 ## TODO
 - [x] Build qwik city with ssr, deploy static and functions, respond with SimpleCache
 
-- [ ] Fix fastly: protocol import errors and allow utiltiy functions to be used from ssr project (e.g. env from fastly:env)
+- [x] Fix fastly: protocol import errors and allow utiltiy functions to be used from ssr project (e.g. env from fastly:env)
     ```
     Error [PLUGIN_ERROR]: Only URLs with a scheme in: file, data, and node are supported by the default ESM loader. Received protocol 'fastly:'
     ```
@@ -65,7 +65,11 @@ The intent of this project is to build and test a Qwik City adapter for Fastly's
 ## Known issues
 The `@fastly/js-compute` library exposes type definitions through a [Typescript triple-slash directive](https://www.typescriptlang.org/docs/handbook/triple-slash-directives.html) as shown [here](https://js-compute-reference-docs.edgecompute.app/docs/#trying-things-out). It has lead to issues when including types inside the adapter's source, both when building the server entrypoint as well as ensuring the API Extractor tools are aware of these 3rd party types. 
 
-### Vite/Rollup Errors
+Most errors would be fixed by making the `@fastly/js-compute` module expose its types through the module interface instead of relying on compiler directives. This would also allow the types to be scoped/referenced within the adapter middleware without instealling the fastly specific modules to the root of the qwik monorepo.
+
+<!-- The below are fixed and out of date, but kept for possible refernece later -->
+
+<!-- ### Vite/Rollup Errors
 After adding the adapter to an empty qwik city project, a likely next step is to include a call to one of the Fastly runtime APIs, like `env`. These **external** functions have their signatures imported like a normal module: `import { env } from 'fastly:env'`.
 
 - When building with this format, the following error occurs.
@@ -118,4 +122,4 @@ This is not an ideal setup. Hopefully, once a fix for the vite/rollup protocol e
 An initial fix is to include a `fastly.d.ts` in the qwik monorepo's [root tsconfig](https://github.com/kalebpace/qwik/blob/kpace/fastly-adapter/tsconfig.json#L156).
 
 
-
+ -->
