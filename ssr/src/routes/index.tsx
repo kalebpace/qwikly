@@ -1,8 +1,14 @@
 import { component$ } from "@builder.io/qwik";
-import type { DocumentHead } from "@builder.io/qwik-city";
-import { env } from 'fastly:env'
+import { routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
+
+export const useEnvData = routeLoader$(async () => {
+  const { env } = await import('fastly:env');
+  const value = env("FASTLY_HOSTNAME");
+  return value
+})
 
 export default component$(() => {
+  const signal = useEnvData();
   return (
     <>
       <h1>Hi 👋</h1>
@@ -11,8 +17,8 @@ export default component$(() => {
         <br />
         Happy coding.
       </p>
-      <p>Output from: <span><pre>env("FASTLY_HOSTNAME")</pre></span></p>
-      <pre>{env("FASTLY_HOSTNAME")}</pre>
+      <p>Output from: <pre>env("FASTLY_HOSTNAME")</pre></p>
+      <pre>{signal.value}</pre>
     </>
   );
 });

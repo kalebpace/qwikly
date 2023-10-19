@@ -3,8 +3,6 @@
 /lib
 /lib-types
 /server
-/bin
-/pkg
 
 # Development
 node_modules
@@ -43,4 +41,5 @@ lerna-debug.log*
 !.yarn/releases
 
 # fastly
-./compute-js/
+/bin
+/pkg
