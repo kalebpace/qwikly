@@ -2,3 +2,7 @@
 	path = qwik
 	url = git@github.com:kalebpace/qwik
 	branch = kpace/fastly-adapter
+[submodule "js-compute-runtime"]
+	path = js-compute-runtime
+	url = git@github.com:kalebpace/js-compute-runtime.git
+	branch = kpace/export-module-types
