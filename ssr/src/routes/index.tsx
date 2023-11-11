@@ -1,14 +1,18 @@
 import { component$ } from "@builder.io/qwik";
-import { routeLoader$, type DocumentHead } from "@builder.io/qwik-city";
+import { type DocumentHead, routeLoader$ } from "@builder.io/qwik-city";
 
-export const useEnvData = routeLoader$(async () => {
-  const { env } = await import('fastly:env');
-  const value = env("FASTLY_HOSTNAME");
-  return value
-})
+export const useFastly = routeLoader$(async (requestEvent) => {
+  // This code runs only on the server, after every navigation
+  const fastlyBackendFetchTest = await (await requestEvent.platform.fetch(`https://ifconfig.io/ip`, { backend: "ifconfig" })).text();
+  const fastlyEnvTest = requestEvent.platform.env("FASTLY_HOSTNAME")
+  return {
+    fastlyBackendFetchTest,
+    fastlyEnvTest
+  }
+});
 
 export default component$(() => {
-  const signal = useEnvData();
+  const signal = useFastly()
   return (
     <>
       <h1>Hi 👋</h1>
@@ -17,8 +21,8 @@ export default component$(() => {
         <br />
         Happy coding.
       </p>
-      <p>Output from: <pre>env("FASTLY_HOSTNAME")</pre></p>
-      <pre>{signal.value}</pre>
+      <pre>{signal.value.fastlyBackendFetchTest}</pre>
+      <pre>{signal.value.fastlyEnvTest}</pre>
     </>
   );
 });

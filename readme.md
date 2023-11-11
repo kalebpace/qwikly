@@ -9,10 +9,12 @@ https://steadily-endless-sunbeam.edgecompute.app/
     Error [PLUGIN_ERROR]: Only URLs with a scheme in: file, data, and node are supported by the default ESM loader. Received protocol 'fastly:'
     ```
 
-- [ ] Fix fetches for static assets
+- [x] Fix fetches for static assets
     ```
     Error while running request handler: No backend specified for request with url http://127.0.0.1:7676/manifest.json. Must provide a `backend` property on the `init` object passed to either `new Request()` or `fetch`
     ```
+
+- [x] Fix fetches with defined backends
 
 - [ ] Implement redirects with VCL: https://developer.fastly.com/solutions/tutorials/redirects/, similar to Cloudflare Pages _routes.json
 
@@ -23,14 +25,19 @@ The existing `ssr` project was generated with the following
 ```
 pnpm create qwik@latest empty ./ssr && cd ./ssr
 
+# Link deps
+cd ./js-compute-runtime
+pnpm link --global
+
 # Build the qwik monorepo submodule and link it globally for use in other projects
 cd ./qwik
+pnpm link --global @fastly/js-compute
 pnpm install && pnpm api.update && pnpm build && pnpm link.dist
 
 # Must link against the submodule twice since 'qwik add' causes an unlink
-pnpm install && pnpm link --global @builder.io/qwik @builder.io/qwik-city
+pnpm install && pnpm link --global @builder.io/qwik @builder.io/qwik-city @fastly/js-compute
 pnpm qwik add fastly
-pnpm install && pnpm link --global @builder.io/qwik @builder.io/qwik-city
+pnpm install && pnpm link --global @builder.io/qwik @builder.io/qwik-city @fastly/js-compute
 ```
 
 ### Building
