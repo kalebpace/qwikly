@@ -10,3 +10,8 @@ service_id = "WsI3ucyZwnMaVIRJkDdlt2"
 
 [scripts]
   build = "npm run build.server"
+
+[local_server]
+  [local_server.backends]
+    [local_server.backends.ifconfig]
+      url = "https://ifconfig.io/"

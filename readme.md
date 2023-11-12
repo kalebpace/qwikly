@@ -1,27 +1,13 @@
-## Demo
-https://steadily-endless-sunbeam.edgecompute.app/
+## Qwikly
+- TODO
+    - [ ] Remove all pnpm workspace links
+    - [ ] Improve adapter documentation
 
-## TODO
-- [x] Build qwik city with ssr, deploy static and functions, respond with SimpleCache
 
-- [x] Fix fastly: protocol import errors and allow utiltiy functions to be used from ssr project (e.g. env from fastly:env)
-    ```
-    Error [PLUGIN_ERROR]: Only URLs with a scheme in: file, data, and node are supported by the default ESM loader. Received protocol 'fastly:'
-    ```
-
-- [x] Fix fetches for static assets
-    ```
-    Error while running request handler: No backend specified for request with url http://127.0.0.1:7676/manifest.json. Must provide a `backend` property on the `init` object passed to either `new Request()` or `fetch`
-    ```
-
-- [x] Fix fetches with defined backends
-
-- [ ] Implement redirects with VCL: https://developer.fastly.com/solutions/tutorials/redirects/, similar to Cloudflare Pages _routes.json
-
-- [ ] Implement custom headers: https://developer.fastly.com/reference/http/http-headers/
-
-### Fastly SSR Setup
+### Setup
 The existing `ssr` project was generated with the following
+- Ensure `"type": "module"` is added to the `package.json` of the `ssr` project after initial creation
+
 ```
 pnpm create qwik@latest empty ./ssr && cd ./ssr
 
@@ -29,7 +15,7 @@ pnpm create qwik@latest empty ./ssr && cd ./ssr
 cd ./js-compute-runtime
 pnpm link --global
 
-# Build the qwik monorepo submodule and link it globally for use in other projects
+# Build the qwik monorepo submodule and link it globally for use in our projects
 cd ./qwik
 pnpm link --global @fastly/js-compute
 pnpm install && pnpm api.update && pnpm build && pnpm link.dist
@@ -38,14 +24,8 @@ pnpm install && pnpm api.update && pnpm build && pnpm link.dist
 pnpm install && pnpm link --global @builder.io/qwik @builder.io/qwik-city @fastly/js-compute
 pnpm qwik add fastly
 pnpm install && pnpm link --global @builder.io/qwik @builder.io/qwik-city @fastly/js-compute
-```
 
-### Building
-Before running build commands:
-- add `"type": "module"` to your `package.json` in the `ssr` project
-- add a `<pre>{env("FASTLY_HOSTNAME")</pre>` inside `./ssr/src/routes/index.tsx` to test the fastly env functionality
-```
-# Builds qwik project and generates wasm with js-compute
+# Builds qwik project and generates wasm with js-compute and inlined static assets
 pnpm build.server
 
 # Runs built artifacts locally
@@ -55,24 +35,30 @@ pnpm serve
 pnpm run deploy
 ```
 
-# Discussion
+### `js-compute-runtime`
+The `@fastly/js-compute` package can be difficult to include into projects due to its exposure of types only through [Typescript's triple-slash compliler directive](https://www.typescriptlang.org/docs/handbook/triple-slash-directives.html) as shown [in the _Compute@Edge_ examples](https://js-compute-reference-docs.edgecompute.app/docs/#trying-things-out). The propsoal is to expose `@fastly/js-compute` types through the JavaScript module system so that dependant projects will have access to types through the `import`/`export` syntax such as:
+```typescript
+import type { FetchEvent } from '@fastly/js-compute';
+```  
 
-## Summary
-The intent of this project is to build and test a Qwik City adapter for Fastly's Edge@Compute service. The architecture consists of three components:
+While developing the Qwik City Fastly Adapter, there was a need to import types within the [adapter middleware](https://qwik.builder.io/docs/deployments/#add-middleware) to enable framework usage of _Compute@Edge_ features. All example usage of _Compute@Edge_ applications require the use of the directive `/// <reference types="@fastly/js-compute"/>`, however when included into the middleware, causes issues in two ways:
+1. It creates conflicts with global types. For example, the standard `FetchEvent` type is overridden, which causes type errors anywhere Qwik expects a non-fastly-specific fetch event type, and does not give the developer the choice of which types are imported or overridden.
+2. It does not make the toolchain aware of dependant types. The Qwik project leverages [api-extractor](https://api-extractor.com/) to generate its type and project documentation. When a directive is used in a given file, it does not make the types available to the wider toolchain, which leads to build and test failures due to missing types in both the server entrypoint as well as documentation generation. 
 
+There was an attempt to make the directive work with the Qwik project by placing the directive in a `fastly.d.ts` definition file and including it in the root `tsconfig.json`. This partially worked in solving the toolchain type awareness, but still exhibited issues with global type overrides, broke from the conventions found in other adapters and runtimes, circumvented vite/rollup's ability to mark types/modules as external, and made it unclear to future maintainers where the _Compute@Edge_ types and functions came from within the middleware source.
+
+
+### Qwik City Fastly Adapter
+The architecture [follows this guide](https://qwik.builder.io/docs/deployments/#add-a-new-deployment) and consists of three components:
 1. The [Vite config.](https://github.com/kalebpace/qwik/blob/kpace/fastly-adapter/packages/qwik-city/adapters/fastly/vite/index.ts) Responsible for generating a server entrypoint for the Fastly platform.
 2. The [platform middleware.](https://github.com/kalebpace/qwik/blob/kpace/fastly-adapter/packages//qwik-city/middleware/fastly/index.ts) Responsible for handling the Fastly platform [`FetchEvent`](https://js-compute-reference-docs.edgecompute.app/docs/globals/FetchEvent/) on each request and mapping qwik-city features to the platform. This includes:
-    - [SimpleCache](https://js-compute-reference-docs.edgecompute.app/docs/fastly:cache/SimpleCache/) for static routes
+    - [PublishServer](https://github.com/fastly/compute-js-static-publish/blob/main/src/server/publisher-server.ts) to serve static assets from inline WASM or _Compute@Edge_ KV Store
+    - [SimpleCache](https://js-compute-reference-docs.edgecompute.app/docs/fastly:cache/SimpleCache/) for response caching
     - `FetchEvent.waitUntil()` for work needed before the runtime is shutdown.
     - Qwik City's [internal request handling](https://qwik.builder.io/api/qwik-city-middleware-request-handler/#requesthandler) to [generate an SSR'd response](https://github.com/kalebpace/qwik/blob/kpace/fastly-adapter/packages/qwik-city/middleware/fastly/index.ts#L82)
 3. The [starter template.](https://github.com/kalebpace/qwik/blob/kpace/fastly-adapter/starters/adapters/fastly/) Responsible for **merging** template files and settings with an existing qwik-city project.
-    - This template includes the `@fastly/js-compute` library which contains the `js-compute-runtime` command. This command is responsible for building the `bin/main.wasm` executable and packing this up into a Fastly deployable `pkg/[fastly service name].tar.gz` tarball.
-
-
-## Known issues
-The `@fastly/js-compute` library exposes type definitions through a [Typescript triple-slash directive](https://www.typescriptlang.org/docs/handbook/triple-slash-directives.html) as shown [here](https://js-compute-reference-docs.edgecompute.app/docs/#trying-things-out). It has lead to issues when including types inside the adapter's source, both when building the server entrypoint as well as ensuring the API Extractor tools are aware of these 3rd party types. 
-
-Most errors would be fixed by making the `@fastly/js-compute` module expose its types through the module interface instead of relying on compiler directives. This would also allow the types to be scoped/referenced within the adapter middleware without instealling the fastly specific modules to the root of the qwik monorepo.
+    - This template includes the `@fastly/compute-js-static-publish` along with a default `static-publish.rc.js` config. This is responsible for building mappings of static assets and including them inline to the WASM binary or uploading them to the KV Store. A `statics.js` gets generated during this process, which yields a `getServer()` factory for creating a `PublisherServer` that gets passed into the middleware at runtime. 
+    - This template also includes the `@fastly/js-compute` library which contains the `js-compute-runtime` command. This command is responsible for building the `bin/main.wasm` executable and packing this up into a Fastly deployable `pkg/[fastly service name].tar.gz` tarball.
 
 <!-- The below are fixed and out of date, but kept for possible refernece later -->
 
@@ -128,5 +114,16 @@ This is not an ideal setup. Hopefully, once a fix for the vite/rollup protocol e
 
 An initial fix is to include a `fastly.d.ts` in the qwik monorepo's [root tsconfig](https://github.com/kalebpace/qwik/blob/kpace/fastly-adapter/tsconfig.json#L156).
 
+## TODO
+- [x] Build qwik city with ssr, deploy static and functions, respond with SimpleCache
+- [x] Fix fastly: protocol import errors and allow utiltiy functions to be used from ssr project (e.g. env from fastly:env)
+    ```
+    Error [PLUGIN_ERROR]: Only URLs with a scheme in: file, data, and node are supported by the default ESM loader. Received protocol 'fastly:'
+    ```
+- [x] Fix fetches for static assets
+    ```
+    Error while running request handler: No backend specified for request with url http://127.0.0.1:7676/manifest.json. Must provide a `backend` property on the `init` object passed to either `new Request()` or `fetch`
+    ```
+- [x] Fix fetches with defined backends
 
  -->
