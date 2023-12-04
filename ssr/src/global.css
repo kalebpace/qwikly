@@ -1,5 +1,3 @@
-
-
 /**
  * WHAT IS THIS FILE?
  *
@@ -32,4 +30,14 @@ html {
 body {
   padding: 0;
   line-height: inherit;
+}
+
+table,
+th,
+td {
+  border: 1px solid;
+}
+
+td {
+  padding-right: 1em;
 }

@@ -1,8 +1,6 @@
 ## Qwikly
-- TODO
-    - [ ] Remove all pnpm workspace links
-    - [ ] Improve adapter documentation
 
+A reference implemenation of the Qwik adapter for the Fastly platform
 
 ### Setup
 The existing `ssr` project was generated with the following
@@ -11,19 +9,15 @@ The existing `ssr` project was generated with the following
 ```
 pnpm create qwik@latest empty ./ssr && cd ./ssr
 
-# Link deps
-cd ./js-compute-runtime
-pnpm link --global
-
 # Build the qwik monorepo submodule and link it globally for use in our projects
 cd ./qwik
 pnpm link --global @fastly/js-compute
 pnpm install && pnpm api.update && pnpm build && pnpm link.dist
 
 # Must link against the submodule twice since 'qwik add' causes an unlink
-pnpm install && pnpm link --global @builder.io/qwik @builder.io/qwik-city @fastly/js-compute
+pnpm install && pnpm link --global @builder.io/qwik @builder.io/qwik-city
 pnpm qwik add fastly
-pnpm install && pnpm link --global @builder.io/qwik @builder.io/qwik-city @fastly/js-compute
+pnpm install && pnpm link --global @builder.io/qwik @builder.io/qwik-city
 
 # Builds qwik project and generates wasm with js-compute and inlined static assets
 pnpm build.server
@@ -34,19 +28,6 @@ pnpm serve
 # Creates or deploys the project to fastly
 pnpm run deploy
 ```
-
-### `js-compute-runtime`
-The `@fastly/js-compute` package can be difficult to include into projects due to its exposure of types only through [Typescript's triple-slash compliler directive](https://www.typescriptlang.org/docs/handbook/triple-slash-directives.html) as shown [in the _Compute@Edge_ examples](https://js-compute-reference-docs.edgecompute.app/docs/#trying-things-out). The propsoal is to expose `@fastly/js-compute` types through the JavaScript module system so that dependant projects will have access to types through the `import`/`export` syntax such as:
-```typescript
-import type { FetchEvent } from '@fastly/js-compute';
-```  
-
-While developing the Qwik City Fastly Adapter, there was a need to import types within the [adapter middleware](https://qwik.builder.io/docs/deployments/#add-middleware) to enable framework usage of _Compute@Edge_ features. All example usage of _Compute@Edge_ applications require the use of the directive `/// <reference types="@fastly/js-compute"/>`, however when included into the middleware, causes issues in two ways:
-1. It creates conflicts with global types. For example, the standard `FetchEvent` type is overridden, which causes type errors anywhere Qwik expects a non-fastly-specific fetch event type, and does not give the developer the choice of which types are imported or overridden.
-2. It does not make the toolchain aware of dependant types. The Qwik project leverages [api-extractor](https://api-extractor.com/) to generate its type and project documentation. When a directive is used in a given file, it does not make the types available to the wider toolchain, which leads to build and test failures due to missing types in both the server entrypoint as well as documentation generation. 
-
-There was an attempt to make the directive work with the Qwik project by placing the directive in a `fastly.d.ts` definition file and including it in the root `tsconfig.json`. This partially worked in solving the toolchain type awareness, but still exhibited issues with global type overrides, broke from the conventions found in other adapters and runtimes, circumvented vite/rollup's ability to mark types/modules as external, and made it unclear to future maintainers where the _Compute@Edge_ types and functions came from within the middleware source.
-
 
 ### Qwik City Fastly Adapter
 The architecture [follows this guide](https://qwik.builder.io/docs/deployments/#add-a-new-deployment) and consists of three components:

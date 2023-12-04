@@ -8,6 +8,7 @@ export default extendConfig(baseConfig, () => {
       ssr: true,
       rollupOptions: {
         input: ["src/entry.fastly.tsx", "@qwik-city-plan"],
+        external: [/fastly:.*/],
       },
     },
     plugins: [fastlyAdapter()],
