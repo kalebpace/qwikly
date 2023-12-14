@@ -1,32 +1,23 @@
-## Qwikly
-
-A reference implemenation of the Qwik adapter for the Fastly platform
-
 ### Setup
-The existing `ssr` project was generated with the following
-- Ensure `"type": "module"` is added to the `package.json` of the `ssr` project after initial creation
+
+Link the two submodules
 
 ```
-pnpm create qwik@latest empty ./ssr && cd ./ssr
-
 # Build the qwik monorepo submodule and link it globally for use in our projects
 cd ./qwik
-pnpm link --global @fastly/js-compute
 pnpm install && pnpm api.update && pnpm build && pnpm link.dist
 
-# Must link against the submodule twice since 'qwik add' causes an unlink
-pnpm install && pnpm link --global @builder.io/qwik @builder.io/qwik-city
-pnpm qwik add fastly
+cd ../qwik-city-e2e
 pnpm install && pnpm link --global @builder.io/qwik @builder.io/qwik-city
 
 # Builds qwik project and generates wasm with js-compute and inlined static assets
-pnpm build.server
+pnpm build.fastly
 
 # Runs built artifacts locally
-pnpm serve
+pnpm serve.fastly
 
 # Creates or deploys the project to fastly
-pnpm run deploy
+pnpm deploy.fastly
 ```
 
 ### Qwik City Fastly Adapter
