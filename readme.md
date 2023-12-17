@@ -1,3 +1,8 @@
+### Active PRs & Discussion
+- [Init adapter in Qwik Core](https://github.com/BuilderIO/qwik/pull/5552)
+- [Init adapter in Qwik e2e test app](https://github.com/BuilderIO/qwik-city-e2e/pull/9)
+- [Missing APIs in Fastly js-compute](https://github.com/fastly/js-compute-runtime/issues/711)
+
 ### Setup
 
 Link the two submodules
